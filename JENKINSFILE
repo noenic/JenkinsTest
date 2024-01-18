@@ -99,7 +99,7 @@ pipeline {
                                 footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                                webhookURL: DISCORD_WEBHOOK
 
                             )
                         }
