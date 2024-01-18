@@ -50,15 +50,17 @@ pipeline {
                         // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
                         discordSend(
                             title: "Test, Build, and Push on Worker",
-                            description: currentBuild.currentResult == 'SUCCESS' ? "Le test, build et push de l'application est un succès." : "Le test, build et push de l'application est un échec. \n\n Etape en cours : ${currentStep}",
+                            description: currentBuild.currentResult == 'SUCCESS' ? "Le test, build et push de l'application est un succès." : "Le test, build et push de l'application est un échec. \n\n Erreur sur : ${currentStep}",
                             footer: "Build ${currentBuild.number}",
                             link: env.BUILD_URL,
                             result: currentBuild.currentResult,
                             webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                         )
-
+                        if (currentBuild.currentResult == 'FAILURE') {
+                            error("Erreur sur : ${currentStep}")
+                        }
                     
-                }
+                    }
                 }
             }
         }
@@ -67,35 +69,32 @@ pipeline {
             agent {
                 label 'master'
             }
-            when {
-                expression {
-                    currentBuild.currentResult == 'SUCCESS'
-                }
-            }
 
             steps {
                 script {
                     try {
+                        currentStep = "helm upgrade"
                         echo "Déploiement de l'application avec Helm"
                         sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp"
 
+
+                        currentStep = "check if deployment is on new version"
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
                         def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                        if (response == latestVersion) {
-                            echo "La dernière version est correctement déployée."
-                        } else {
-                            error('La dernière version n\'est pas correctement déployée.')
+                        if (response != latestVersion) {
+                            currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         }
+
+
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                        
                     } finally {
                         // Notification Discord à la fin de l'étape
                         script {
                             discordSend(
                                 title: "Déploiement de l'application avec Helm",
-                                description: "Etat du déploiement : ${currentBuild.currentResult} \n\n Version déployée : ${env.VERSION}",
+                                description: currentBuild.currentResult == 'SUCCESS' ? "Le déploiement de l'application est un succès." : "Le déploiement de l'application est un échec. \n\n Erreur sur : ${currentStep}",
                                 footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
