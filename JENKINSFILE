@@ -9,7 +9,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        def currentStep = "dependencies installation"
+                        currentStep = "dependencies installation"
                         echo "Étape 0 : Installation des dépendances"
                         sh 'pip3 install -r requirements.txt'
 
@@ -17,7 +17,7 @@ pipeline {
                         echo "Étape 1 : Lancer le serveur Flask main.py"
                         sh 'python3 src/main.py &'
                         
-                        // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
+                        // Attendre un peu pour que le serveur démarre 
                         sleep time: 5, unit: 'SECONDS'
                         
 
