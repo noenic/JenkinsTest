@@ -1,6 +1,5 @@
 pipeline {
     agent none
-
     stages {
         stage('Test, Build, and Push on Worker') {
             agent {
@@ -8,6 +7,7 @@ pipeline {
             }
             steps {
                 script {
+                    withCredentials([string(credentialsId: 'discord_webhook', variable: 'DISCORD_WEBHOOK')]){
                     try {
                         currentStep = "dependencies installation"
                         echo "Étape 0 : Installation des dépendances"
@@ -44,6 +44,7 @@ pipeline {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                     } finally {
                         // Notification Discord à la fin de l'étape
+
                         // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
                         discordSend(
                             title: "Test, Build, and Push on Worker",
@@ -51,12 +52,13 @@ pipeline {
                             footer: "Build ${currentBuild.number}",
                             link: env.BUILD_URL,
                             result: currentBuild.currentResult,
-                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                            webhookURL:  DISCORD_WEBHOOK
                         )
                     
                     }
                 }
             }
+          }
         }
 
         stage('Deploy Helm Chart on Master') {
@@ -72,6 +74,7 @@ pipeline {
 
             steps {
                 script {
+                    withCredentials([string(credentialsId: 'discord_webhook', variable: 'DISCORD_WEBHOOK')]){
                     try {
                         currentStep = "helm upgrade"
                         echo "Déploiement de l'application avec Helm"
@@ -102,23 +105,7 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        // Si currentBuild.currentResult == 'FAILURE' on fait un artifact du fichier de log
-        stage('Archive logs') {
-            agent {
-                label 'master'
-            }
-            when {
-                expression {
-                    currentBuild.currentResult == 'FAILURE'
-                }
-            }
-            steps {
-                script {
-                    sh "cat /var/lib/jenkins/workspace/${currentBuild.number}/log"
-                    archiveArtifacts artifacts: "/var/lib/jenkins/workspace/${currentBuild.number}/log", onlyIfSuccessful: false
-                }
+             }
             }
         }
     }
