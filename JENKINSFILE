@@ -8,14 +8,17 @@ pipeline {
             }
             steps {
                 script {
+                    // Etape 0 : installation des dépendances
+                    sh 'pip install -r requirements.txt'
+
                     // Étape 1 : Lancer le serveur Flask main.py
-                    sh 'python main.py &'
+                    sh 'python src/main.py &'
                     
                     // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
                     sleep time: 5, unit: 'SECONDS'
                     
                     // Étape 2 : Exécuter les tests de l'application (test.py)
-                    sh 'python test.py'
+                    sh 'python src/test.py'
                     
                     // Étape 3 : Arrêter le serveur Flask
                     sh 'pkill -f main.py'
