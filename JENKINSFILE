@@ -45,8 +45,8 @@ pipeline {
                         script {
                             discordSend(
                                 title: "Test, Build, et Push sur le worker",
-                                description: currentBuild.result == 'SUCCESS' ? "Réussi! Version: ${env.VERSION}" : "Échoué!",
-                                footer: "Footer Text",
+                                description: "Le build ${currentBuild.number} a été exécuté avec le résultat ${currentBuild.currentResult}.",
+                                footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
                                 webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
@@ -81,12 +81,13 @@ pipeline {
                         // Notification Discord à la fin de l'étape
                         script {
                             discordSend(
-                                title: "Déploiement avec Helm",
-                                description: currentBuild.result == 'SUCCESS' ? "Réussi! Version déployée: ${env.VERSION}" : "Échoué!",
-                                footer: "Footer Text",
+                                title: "Déploiement de l'application avec Helm",
+                                description: "Le build ${currentBuild.number} a été exécuté avec le résultat ${currentBuild.currentResult}.",
+                                footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
                                 webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+
                             )
                         }
                     }
