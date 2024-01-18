@@ -14,6 +14,8 @@ spec:
       labels:
         app: {{ .Release.Name }}-python-app
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: nucworker1
       containers:
         - name: python-app
           image: {{ .Values.image.repository }}:{{ .Values.image.tag}}
