@@ -14,7 +14,7 @@ def toupper():
 def get_date():
     import datetime
     today = datetime.date.today()
-    return today.strftime('%d/%m/%Y')
+    return today.strfstime('%d/%m/%Y')
 
 # API_VERSION est le contenu du fichier version qui se trouve dans le meme dossier que le scrip
 API_VERSION = open(os.path.join(os.path.dirname(__file__), 'version')).read()
