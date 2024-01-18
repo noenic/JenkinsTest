@@ -1,0 +1,33 @@
+pipeline {
+    agent none  // Aucun agent par défaut
+
+    stages {
+        stage('Stage 1 - Créer fichier "stage1" sur Worker') {
+            agent {
+                label 'worker'  // Exécuter sur un nœud de travail avec l'étiquette "worker"
+            }
+            steps {
+                sh 'echo "Contenu du stage 1" > stage1.txt'  // Créer le fichier "stage1"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'stage1.txt', onlyIfSuccessful: true
+                }
+            }
+        }
+
+        stage('Stage 2 - Créer fichier "stage2" sur Master') {
+            agent {
+                label 'master'  // Exécuter sur un nœud de travail avec l'étiquette "master"
+            }
+            steps {
+                sh 'echo "Contenu du stage 2" > stage2.txt'  // Créer le fichier "stage2"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'stage2.txt', onlyIfSuccessful: true
+                }
+            }
+        }
+    }
+}
