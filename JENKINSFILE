@@ -45,7 +45,7 @@ pipeline {
                         script {
                             discordSend(
                                 title: "Test, Build, et Push sur le worker",
-                                description: "Le build ${currentBuild.number} a été exécuté avec le résultat ${currentBuild.currentResult}.",
+                                description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION}",
                                 footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
@@ -82,7 +82,7 @@ pipeline {
                         script {
                             discordSend(
                                 title: "Déploiement de l'application avec Helm",
-                                description: "Le build ${currentBuild.number} a été exécuté avec le résultat ${currentBuild.currentResult}.",
+                                description: "Etat du déploiement : ${currentBuild.currentResult} \n\n Version déployée : ${env.VERSION}",
                                 footer: "Build ${currentBuild.number}",
                                 link: env.BUILD_URL,
                                 result: currentBuild.currentResult,
