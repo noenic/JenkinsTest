@@ -38,9 +38,10 @@ pipeline {
 
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        def stdout = sh(script: 'echo $output', returnStdout: true).trim()
                         discordSend(
                             title: "Test, Build, et Push sur le worker",
-                            description: "Erreur : ${e.getMessage()}",
+                            description: "Erreur : ${stdout}",
                             footer: "Build ${currentBuild.number}",
                             link: env.BUILD_URL,
                             result: currentBuild.currentResult,
@@ -83,9 +84,10 @@ pipeline {
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        def stdout = sh(script: 'echo $output', returnStdout: true).trim()
                         discordSend(
                             title: "Déploiement de l'application avec Helm",
-                            description: "Erreur : ${e.getMessage()}",
+                            description: "Erreur : ${stdout}",
                             footer: "Build ${currentBuild.number}",
                             link: env.BUILD_URL,
                             result: currentBuild.currentResult,
