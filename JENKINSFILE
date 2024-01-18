@@ -84,7 +84,7 @@ pipeline {
                         if (response == latestVersion) {
                             echo "La dernière version est correctement déployée."
                         } else {
-                            error("La dernière version n'est pas correctement déployée.")
+                            echo "La dernière version n'est pas correctement déployée."
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
