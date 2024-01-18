@@ -75,9 +75,10 @@ pipeline {
             }
             steps {
                 script {
+                    def output
                     try {
                         echo "Déploiement de l'application avec Helm"
-                        def output = sh (script: "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp")
+                        output = sh (script: "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp")
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
                         def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
@@ -88,9 +89,10 @@ pipeline {
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                    } finally {
                     // Notification Discord à la fin de l'étape
                     // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
-                    
+
                         if (currentBuild.currentResult == 'SUCCESS') {
                             discordSend(
                                 title: "Deploy Helm Chart on Master",
