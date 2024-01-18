@@ -8,62 +8,84 @@ pipeline {
             }
             steps {
                 script {
-                    try {
-                        echo "Étape 0 : Installation des dépendances"
-                        sh 'pip3 install -r requirements.txt'
-
-                        echo "Étape 1 : Lancer le serveur Flask main.py"
-                        sh 'python3 src/main.py &'
-                        
-                        // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
-                        sleep time: 5, unit: 'SECONDS'
-                        
-                        echo "Étape 2 : Exécuter les tests de l'application (test.py)"
-                        // sh 'python3 src/tesst.py'
-                        def output= sh(script: 'python3 src/tesst.py', returnStdout: true).trim()
-                        echo "Output : ${output}"
-                        
-                        echo "Étape 3 : Arrêter le serveur Flask"
-                        sh 'pkill -f main.py'
-                        
-                        echo "Étape 4 : Lire la version depuis le fichier"
-                        def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                        env.VERSION = versionFileContent
-
-                        echo "La version du fichier est : ${env.VERSION}"
-
-                        echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
-                        
-                        echo "Étape 6 : Push de l'image taguée sur DockerHub"
-                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
-
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                    } finally {
-                        // Notification Discord à la fin de l'étape
-                        // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
-                        if (currentBuild.currentResult == 'SUCCESS') {
-                            discordSend(
-                                title: "Test, Build, and Push on Worker",
-                                description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION}",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                            )
-                        } else {
-                            discordSend(
-                                title: "Test, Build, and Push on Worker",
-                                description: "Erreur :",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                            )
-                        }
-                    
+                    echo "Étape 0 : Installation des dépendances"
+                    sh 'pip3 install -r requirements.txt'
                 }
+            }
+
+            steps {
+                script {
+                    echo "Étape 1 : Lancer le serveur Flask main.py"
+                    sh 'python3 src/main.py &'
+
+                    // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
+                    sleep time: 5, unit: 'SECONDS'
+                }
+            }
+
+            steps {
+                script {
+                    echo "Étape 2 : Exécuter les tests de l'application (test.py)"
+                    sh 'python3 src/tesst.py'
+                    echo "Output : ${output}"
+                }
+            }
+
+            steps {
+                script {
+                    echo "Étape 3 : Arrêter le serveur Flask"
+                    sh 'pkill -f main.py'
+                }
+            }
+
+            steps {
+                script {
+                    echo "Étape 4 : Lire la version depuis le fichier"
+                    def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                    env.VERSION = versionFileContent
+
+                    echo "La version du fichier est : ${env.VERSION}"
+                }
+            }
+
+            steps {
+                script {
+                    echo "Étape 5 : Build du Dockerfile avec la version taguée"
+                    sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
+                }
+            }
+
+            steps {
+                script {
+                    echo "Étape 6 : Push de l'image taguée sur DockerHub"
+                    sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
+                }
+            }
+
+            steps {
+                script {
+                    // Notification Discord à la fin de l'étape
+                    // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
+                    if (currentBuild.currentResult == 'SUCCESS') {
+                        discordSend(
+                            title: "Test, Build, and Push on Worker",
+                            description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION}",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
+                    } else {
+                        discordSend(
+                            title: "Test, Build, and Push on Worker",
+                            description: "Erreur :",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
+                        error("Le build a échoué. Les étapes suivantes ne seront pas exécutées.")
+                    }
                 }
             }
         }
@@ -71,6 +93,11 @@ pipeline {
         stage('Deploy Helm Chart on Master') {
             agent {
                 label 'master'
+            }
+            when {
+                expression {
+                    currentBuild.currentResult != 'FAILURE'
+                }
             }
             steps {
                 script {
