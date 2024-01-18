@@ -22,7 +22,7 @@ pipeline {
                         sleep time: 5, unit: 'SECONDS'
                         
                         echo "Étape 2 : Exécuter les tests de l'application (test.py)"
-                        sh 'python3 src/test.py > log.txt'
+                        sh 'python3 src/tesst.py > log.txt'
                         
                         echo "Étape 3 : Arrêter le serveur Flask"
                         sh 'pkill -f main.py > log.txt'
@@ -85,7 +85,7 @@ pipeline {
                     try {
                         echo "Déploiement de l'application avec Helm"
                         // output = sh (script: "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp")
-                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp > log.txt"
+                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp > log.txt"
 
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
