@@ -56,16 +56,7 @@ pipeline {
                 success {
                     // Étape 6 : Push de l'image taguée sur DockerHub
                     script {
-                        try {
-                            withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
-                                sh 'docker login -u $username -p $password'
-                                sh "docker tag reg.noenic.duckdns.org/pythonapi:${env.VERSION} $username/pythonapi:${env.VERSION}"
-                                sh "docker push $username/pythonapi:${env.VERSION}"
-                            }
-                        } catch (Exception e) {
-                            currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                            error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-                        }
+                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
                     }
                 }
                 failure {
