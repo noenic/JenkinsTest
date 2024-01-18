@@ -1,27 +1,44 @@
 pipeline {
-    agent none  // Aucun agent par défaut
+    agent none
 
     stages {
-        stage('Stage 1 - Créer fichier "stage1" sur Worker') {
+        stage('Build and Test on Worker') {
             agent {
-                label 'worker'  // Exécuter sur un nœud de travail avec l'étiquette "worker"
+                label 'worker'
             }
             steps {
-                sh 'echo "Contenu du stage test 1" > stage1.txt'  // Créer le fichier "stage1"
+                script {
+                    // Étape 1 : Lancer le serveur Flask main.py
+                    sh 'python main.py &'
+                    
+                    // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
+                    sleep time: 5, unit: 'SECONDS'
+                    
+                    // Étape 2 : Exécuter les tests de l'application (test.py)
+                    sh 'python test.py'
+                    
+                    // Étape 3 : Arrêter le serveur Flask
+                    sh 'pkill -f main.py'
+                }
             }
             post {
-                always {
-                    archiveArtifacts artifacts: 'stage1.txt', onlyIfSuccessful: true
+                success {
+                    // Étape 4 : Build du Dockerfile
+                    sh 'docker build -t pythonapi:latest .'
+                }
+                failure {
+                    error('Les tests ont échoué, arrêt du pipeline.')
                 }
             }
         }
 
-        stage('Stage 2 - Créer fichier "stage2" sur Master') {
+        stage('Verify Docker Image') {
             agent {
-                label 'master'  // Exécuter sur un nœud de travail avec l'étiquette "master"
+                label 'worker'
             }
             steps {
-                sh 'kubectl get pods'  // Créer le fichier "stage2"
+                // Étape 5 : Vérifier que le Dockerfile fonctionne
+                sh 'docker run --rm monapp:latest'
             }
         }
     }
