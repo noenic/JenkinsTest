@@ -16,9 +16,8 @@ def get_date():
     today = datetime.date.today()
     return today.strftime('%d/%m/%Y')
 
-# Variable globale pour stocker la version de l'API
-# c'est une variable d'environnement 
-API_VERSION = os.environ.get('API_VERSION', '1.0.0')
+# API_VERSION est le contenu du fichier version qui se trouve dans le meme dossier que le scrip
+API_VERSION = open(os.path.join(os.path.dirname(__file__), 'version')).read()
 
 # Endpoint pour obtenir la version de l'API
 @app.route('/version')

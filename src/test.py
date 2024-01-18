@@ -20,7 +20,7 @@ class TestApi(unittest.TestCase):
     def test_version_endpoint(self):
         response = requests.get(self.base_url + '/version')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, os.environ.get('API_VERSION', '1.0.0'))
+        self.assertEqual(response.text, open(os.path.join(os.path.dirname(__file__), 'version')).read())
 
     def test_endpoint1(self):
         response = requests.get(self.base_url + '/endpoint1')

@@ -2,7 +2,7 @@ pipeline {
     agent none
 
     stages {
-        stage('Build and Test on Worker') {
+        stage('Lire la version depuis le fichier') {
             agent {
                 label 'worker'
             }
@@ -23,6 +23,29 @@ pipeline {
                         
                         // Étape 3 : Arrêter le serveur Flask
                         sh 'pkill -f main.py'
+                        
+                        // Étape 4 : Lire la version depuis le fichier
+                        def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                        env.VERSION = versionFileContent
+
+                        echo "La version du fichier est : ${env.VERSION}"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                    }
+                }
+            }
+        }
+
+        stage('Build and Test on Worker') {
+            agent {
+                label 'worker'
+            }
+            steps {
+                script {
+                    // Étape 5 : Build du Dockerfile avec la version taguée
+                    try {
+                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
@@ -31,31 +54,22 @@ pipeline {
             }
             post {
                 success {
-                    // Étape 4 : Build du Dockerfile
-                    sh 'docker build -t pythonapi:latest .'
+                    // Étape 6 : Push de l'image taguée sur DockerHub
+                    script {
+                        try {
+                            withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
+                                sh 'docker login -u $username -p $password'
+                                sh "docker tag reg.noenic.duckdns.org/pythonapi:${env.VERSION} $username/pythonapi:${env.VERSION}"
+                                sh "docker push $username/pythonapi:${env.VERSION}"
+                            }
+                        } catch (Exception e) {
+                            currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                            error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                        }
+                    }
                 }
                 failure {
                     error('Les tests ont échoué, arrêt du pipeline.')
-                }
-            }
-        }
-
-        stage('Verify Docker Image') {
-            agent {
-                label 'worker'
-            }
-            steps {
-                script {
-                    // Étape 5 : Vérifier que le Dockerfile fonctionne
-                    try {
-                        sh 'docker run -d -e API_VERSION=1.0.1 --rm pythonapi:latest'
-                        sleep time: 7, unit: 'SECONDS'
-                        sh 'curl http://localhost:8080/api -w "%{http_code}" -o /dev/null'
-                        sh 'docker kill $(docker ps -q)'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-                    }
                 }
             }
         }
