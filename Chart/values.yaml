@@ -1,5 +1,5 @@
 image :
-  repository : "nginx"
+  repository : "reg.noenic.duckdns.org/pythonapi"
   pullPolicy : "Always"
   tag : "latest"
 

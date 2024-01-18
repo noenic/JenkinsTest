@@ -71,7 +71,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh 'echo test'
+                    sh 'helm upgrade --install pythonapi ./helm/pythonapi --set image.tag=0.0.1'
                 }
             }
         }
