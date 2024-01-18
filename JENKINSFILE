@@ -21,12 +21,7 @@ pipeline {
                 label 'master'  // Exécuter sur un nœud de travail avec l'étiquette "master"
             }
             steps {
-                sh 'echo "Contenu du stage 2" > stage2.txt'  // Créer le fichier "stage2"
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'stage2.txt', onlyIfSuccessful: true
-                }
+                sh 'kubectl get pods'  // Créer le fichier "stage2"
             }
         }
     }
