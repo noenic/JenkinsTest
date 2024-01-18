@@ -25,7 +25,7 @@ pipeline {
                         sh 'pkill -f main.py'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                        error('Échec d\'une étape,donc arrêt du pipeline.')  // Arrêter le pipeline
                     }
                 }
             }
