@@ -7,7 +7,7 @@ pipeline {
                 label 'worker'  // Exécuter sur un nœud de travail avec l'étiquette "worker"
             }
             steps {
-                sh 'echo "Contenu du stage 1" > stage1.txt'  // Créer le fichier "stage1"
+                sh 'echo "Contenu du stage test 1" > stage1.txt'  // Créer le fichier "stage1"
             }
             post {
                 always {
