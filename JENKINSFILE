@@ -48,7 +48,7 @@ pipeline {
                 script {
                     // Étape 5 : Vérifier que le Dockerfile fonctionne
                     try {
-                        sh 'docker run --rm pythonapi:latest -e API_VERSION=1.0.1'
+                        sh 'docker run -e API_VERSION=1.0.1 --rm pythonapi:latest '
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
