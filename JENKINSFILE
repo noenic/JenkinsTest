@@ -65,7 +65,7 @@ pipeline {
                 script {
                     try {
                         echo "Déploiement de l'application avec Helm"
-                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
+                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp"
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
                         def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
