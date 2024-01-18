@@ -39,7 +39,14 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-
+                        discordSend(
+                            title: "Test, Build, et Push sur le worker",
+                            description: "Erreur : ${e.getMessage()}",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
                     } finally {
                         // Notification Discord à la fin de l'étape
                         script {
@@ -77,6 +84,14 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                        discordSend(
+                            title: "Déploiement de l'application avec Helm",
+                            description: "Erreur : ${e.getMessage()}",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
                     } finally {
                         // Notification Discord à la fin de l'étape
                         script {
