@@ -53,11 +53,6 @@ pipeline {
                             result: currentBuild.currentResult,
                             webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                         )
-                        if (currentBuild.currentResult == 'FAILURE') {
-                            fullLog = env.BUILD_LOG_MULTILINE
-                            echo "Le journal complet de construction : ${fullLog}"
-                            error("Erreur sur : ${currentStep}")
-                        }
                     
                     }
                 }
@@ -67,6 +62,12 @@ pipeline {
         stage('Deploy Helm Chart on Master') {
             agent {
                 label 'master'
+            }
+            // Si le build précédent est un succès, on continue
+            when {
+                expression {
+                    currentBuild.currentResult == 'SUCCESS'
+                }
             }
 
             steps {
@@ -101,6 +102,21 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+        // Si currentBuild.currentResult == 'FAILURE' on fait un artifact du fichier de log
+        stage('Archive logs') {
+            agent {
+                label 'master'
+            }
+            when {
+                expression {
+                    currentBuild.currentResult == 'FAILURE'
+                }
+            }
+            steps {
+                script {
+                    archiveArtifacts artifacts: "/var/lib/jenkins/workspace/${currentBuild.number}/log", onlyIfSuccessful: false
             }
         }
     }
