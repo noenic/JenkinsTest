@@ -8,13 +8,12 @@ app = Flask(__name__)
 def toupper():
     text = request.args.get('text', '')
     return text.upper()
-
 # Endpoint pour obtenir la date d'aujourd'hui au format jj/mm/aaaa
 @app.route('/date')
 def get_date():
     import datetime
     today = datetime.date.today()
-    return today.strfstime('%d/%m/%Y')
+    return today.strftime('%d/%m/%Y')
 
 # API_VERSION est le contenu du fichier version qui se trouve dans le meme dossier que le scrip
 API_VERSION = open(os.path.join(os.path.dirname(__file__), 'version')).read()

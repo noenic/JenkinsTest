@@ -20,7 +20,7 @@ pipeline {
                         env.VERSION = versionFileContent
                         echo "La version du fichier est : ${env.VERSION}"
 
-                        currentStep = "start flask server"
+                        currentStep = "run program"
                         echo "Étape 2 : Lancer le serveur Flask main.py"
                         sh 'python3 src/main.py &'
                         // Attendre un peu pour que le serveur démarre 
@@ -55,6 +55,7 @@ pipeline {
                         )
                         if (currentBuild.currentResult == 'FAILURE') {
                             error("Erreur sur : ${currentStep}")
+                            archiveArtifacts artifacts: '**/*', fingerprint: true
                         }
                     
                     }
@@ -96,6 +97,9 @@ pipeline {
                                 webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
 
                             )
+                            if (currentBuild.currentResult == 'FAILURE') {
+                                archiveArtifacts artifacts: '**/*', fingerprint: true
+                            }
                         }
                     }
                 }
