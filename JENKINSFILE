@@ -11,6 +11,7 @@ pipeline {
                     try {
                         echo "Étape 0 : Installation des dépendances"
                         def output =  sh(script: 'pip3 install -r requirements.txt', returnStdout: true).trim()
+                        echo {output}
 
                         echo "Étape 1 : Lancer le serveur Flask main.py"
                         output = sh(script: 'python3 src/main.py &', returnStdout: true).trim()
@@ -79,6 +80,7 @@ pipeline {
                     try {
                         echo "Déploiement de l'application avec Helm"
                         output = sh (script: "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp")
+
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
                         def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
