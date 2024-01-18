@@ -1,2 +1,3 @@
 Flask==2.1.1  # Version de Flask
 requests==2.26.0  # Version de la bibliothèque Requests
+Werkzeug==2.0.2
