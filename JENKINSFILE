@@ -9,34 +9,20 @@ pipeline {
             steps {
                 script {
                     try {
-                        // On crée un fichier de log pour stocker le stdout et stderr de la commande
-                        sh 'touch log.txt'
                         echo "Étape 0 : Installation des dépendances"
-                        sh 'pip3 install -r requirements.txt >> log.txt'
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
-
-
+                        sh 'pip3 install -r requirements.txt'
 
                         echo "Étape 1 : Lancer le serveur Flask main.py"
-                        sh 'python3 src/main.py & >> log.txt'
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
-
+                        sh 'python3 src/main.py &'
                         
                         // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
                         sleep time: 5, unit: 'SECONDS'
                         
                         echo "Étape 2 : Exécuter les tests de l'application (test.py)"
-                        sh 'python3 src/tesst.py >> log.txt'
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
+                        sh 'python3 src/test.py'
                         
                         echo "Étape 3 : Arrêter le serveur Flask"
-                        sh 'pkill -f main.py >> log.txt'
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
-
+                        sh 'pkill -f main.py'
                         
                         echo "Étape 4 : Lire la version depuis le fichier"
                         def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
@@ -45,20 +31,12 @@ pipeline {
                         echo "La version du fichier est : ${env.VERSION}"
 
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} . >> log.txt"
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
-
+                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
                         
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
-                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION} >> log.txt"
-                        sh 'rm log.txt'
-                        sh 'touch log.txt'
-                        
+                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
 
                     } catch (Exception e) {
-                        def te = sh(script: 'cat log.txt', returnStdout: true)
-                        echo "Erreur : ${te}"
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                     } finally {
                         
@@ -74,19 +52,15 @@ pipeline {
                                     result: currentBuild.currentResult,
                                     webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                                 )
-                                sh 'rm log.txt'
                             } else {
-                                def output = sh(script: 'cat log.txt', returnStdout: true)
                                 discordSend(
                                     title: "Test, Build, and Push on Worker",
-                                    description: "Erreur : ${output}",
+                                    description: "Erreur : ${stdout}",
                                     footer: "Build ${currentBuild.number}",
                                     link: env.BUILD_URL,
                                     result: currentBuild.currentResult,
                                     webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                                 )
-                                sh 'rm log.txt'
-                                error("Erreur lors de l'exécution des tests ou du build ou du push de l'image Docker.")
                             }
                         }
                     }
@@ -100,11 +74,9 @@ pipeline {
             }
             steps {
                 script {
-                    sh 'touch log.txt'
                     try {
                         echo "Déploiement de l'application avec Helm"
-                        // output = sh (script: "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp")
-                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp > log.txt"
+                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tsp"
 
                         sleep time: 10, unit: 'SECONDS'
                         def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
@@ -112,38 +84,33 @@ pipeline {
                         if (response == latestVersion) {
                             echo "La dernière version est correctement déployée."
                         } else {
-                            sh "echo 'La dernière version n'est pas correctement déployée.' > log.txt"
-                            currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                            error('La dernière version n\'est pas correctement déployée.')
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        def stdout = sh(script: 'echo $output', returnStdout: true).trim()
+                        discordSend(
+                            title: "Déploiement de l'application avec Helm",
+                            description: "Erreur : ${stdout}",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
+                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
                     } finally {
-                    // Notification Discord à la fin de l'étape
-                    // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
+                        // Notification Discord à la fin de l'étape
+                        script {
+                            discordSend(
+                                title: "Déploiement de l'application avec Helm",
+                                description: "Etat du déploiement : ${currentBuild.currentResult} \n\n Version déployée : ${env.VERSION}",
+                                footer: "Build ${currentBuild.number}",
+                                link: env.BUILD_URL,
+                                result: currentBuild.currentResult,
+                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
 
-                        if (currentBuild.currentResult == 'SUCCESS') {
-                            discordSend(
-                                title: "Deploy Helm Chart on Master",
-                                description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION}",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                             )
-                            sh 'rm log.txt'
-                        } else {
-                            def output = sh(script: 'cat log.txt', returnStdout: true)
-                            discordSend(
-                                title: "Deploy Helm Chart on Master",
-                                description: "Erreur : ${output}",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                            )
-                            sh 'rm log.txt'
-                            error("La dernière version n'est pas correctement déployée.")
-                    }
+                        }
                     }
                 }
             }
