@@ -1,0 +1,4 @@
+apiVersion: v2
+name: my-python-app
+description: Helm chart for my Python Flask application
+version: 0.1.0

@@ -1,0 +1,8 @@
+image :
+  repository : "nginx"
+  tag : "1.19.2"
+  pullPolicy : "Always"
+
+
+env :
+  API_VERSION : "0.1.0"
