@@ -2,16 +2,16 @@ pipeline {
     agent none
 
     stages {
-        stage('Test on Worker') {
+        stage('Test, Build, and Push on Worker') {
             agent {
                 label 'worker'
             }
             steps {
                 script {
-                    echo "Étape 0 : Installation des dépendances"
-                    sh 'pip3 install -r requirements.txt'
-
                     try {
+                        echo "Étape 0 : Installation des dépendances"
+                        sh 'pip3 install -r requirements.txt'
+
                         echo "Étape 1 : Lancer le serveur Flask main.py"
                         sh 'python3 src/main.py &'
                         
@@ -29,23 +29,13 @@ pipeline {
                         env.VERSION = versionFileContent
 
                         echo "La version du fichier est : ${env.VERSION}"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-                    }
-                }
-            }
-        }
 
-        stage('Build and Push on Worker') {
-            agent {
-                label 'worker'
-            }
-            steps {
-                script {
-                    echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                    try {
+                        echo "Étape 5 : Build du Dockerfile avec la version taguée"
                         sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
+                        
+                        echo "Étape 6 : Push de l'image taguée sur DockerHub"
+                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
+
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
@@ -53,14 +43,15 @@ pipeline {
                 }
             }
             post {
-                success {
-                    echo "Étape 6 : Push de l'image taguée sur DockerHub"
+                always {
+                    // Notification Discord à la fin de l'étape
                     script {
-                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
+                        discordSend(
+                            color: currentBuild.result == 'SUCCESS' ? 'good' : 'danger',
+                            message: currentBuild.result == 'SUCCESS' ? "Test, Build, et Push sur le worker réussis! Version: ${env.VERSION}" : "Test, Build, et Push sur le worker échoués!",
+                            webhookUrl: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
                     }
-                }
-                failure {
-                    error('Les tests ont échoué, arrêt du pipeline.')
                 }
             }
         }
@@ -71,15 +62,32 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Déploiement de l'application avec Helm"
-                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
-                    sleep time: 10, unit: 'SECONDS'
-                    def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
-                    def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                    if (response == latestVersion) {
-                        echo "La dernière version est correctement déployée."
-                    } else {
-                        error("La dernière version n'est pas correctement déployée.")
+                    try {
+                        echo "Déploiement de l'application avec Helm"
+                        sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
+                        sleep time: 10, unit: 'SECONDS'
+                        def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
+                        def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                        if (response == latestVersion) {
+                            echo "La dernière version est correctement déployée."
+                        } else {
+                            error("La dernière version n'est pas correctement déployée.")
+                        }
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                    }
+                }
+            }
+            post {
+                always {
+                    // Notification Discord à la fin de l'étape
+                    script {
+                        discordSend(
+                            color: currentBuild.result == 'SUCCESS' ? 'good' : 'danger',
+                            message: currentBuild.result == 'SUCCESS' ? "Déploiement réussi! Version déployée: ${env.VERSION}" : "Déploiement échoué!",
+                            webhookUrl: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
                     }
                 }
             }
