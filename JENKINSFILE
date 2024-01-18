@@ -8,20 +8,25 @@ pipeline {
             }
             steps {
                 script {
-                    // Etape 0 : installation des dépendances
+                    // Étape 0 : Installation des dépendances
                     sh 'pip install -r requirements.txt'
 
-                    // Étape 1 : Lancer le serveur Flask main.py
-                    sh 'python src/main.py &'
-                    
-                    // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
-                    sleep time: 5, unit: 'SECONDS'
-                    
-                    // Étape 2 : Exécuter les tests de l'application (test.py)
-                    sh 'python src/test.py'
-                    
-                    // Étape 3 : Arrêter le serveur Flask
-                    sh 'pkill -f main.py'
+                    try {
+                        // Étape 1 : Lancer le serveur Flask main.py
+                        sh 'python src/main.py &'
+                        
+                        // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
+                        sleep time: 5, unit: 'SECONDS'
+                        
+                        // Étape 2 : Exécuter les tests de l'application (test.py)
+                        sh 'python src/test.py'
+                        
+                        // Étape 3 : Arrêter le serveur Flask
+                        sh 'pkill -f main.py'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                    }
                 }
             }
             post {
@@ -40,8 +45,15 @@ pipeline {
                 label 'worker'
             }
             steps {
-                // Étape 5 : Vérifier que le Dockerfile fonctionne
-                sh 'docker run --rm monapp:latest'
+                script {
+                    // Étape 5 : Vérifier que le Dockerfile fonctionne
+                    try {
+                        sh 'docker run --rm pythonapi:latest'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
+                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                    }
+                }
             }
         }
     }
