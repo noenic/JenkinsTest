@@ -71,7 +71,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh 'helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION}'
+                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION}"
                 }
             }
         }
