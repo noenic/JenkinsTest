@@ -39,18 +39,19 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-                    }
-                }
-            }
-            post {
-                always {
-                    // Notification Discord à la fin de l'étape
-                    script {
-                        discordSend(
-                            color: currentBuild.result == 'SUCCESS' ? 'good' : 'danger',
-                            message: currentBuild.result == 'SUCCESS' ? "Test, Build, et Push sur le worker réussis! Version: ${env.VERSION}" : "Test, Build, et Push sur le worker échoués!",
-                            webhookUrl: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                        )
+
+                    } finally {
+                        // Notification Discord à la fin de l'étape
+                        script {
+                            discordSend(
+                                title: "Test, Build, et Push sur le worker",
+                                description: currentBuild.result == 'SUCCESS' ? "Réussi! Version: ${env.VERSION}" : "Échoué!",
+                                footer: "Footer Text",
+                                link: env.BUILD_URL,
+                                result: currentBuild.currentResult,
+                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                            )
+                        }
                     }
                 }
             }
@@ -76,18 +77,18 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                         error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
-                    }
-                }
-            }
-            post {
-                always {
-                    // Notification Discord à la fin de l'étape
-                    script {
-                        discordSend(
-                            color: currentBuild.result == 'SUCCESS' ? 'good' : 'danger',
-                            message: currentBuild.result == 'SUCCESS' ? "Déploiement réussi! Version déployée: ${env.VERSION}" : "Déploiement échoué!",
-                            webhookUrl: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                        )
+                    } finally {
+                        // Notification Discord à la fin de l'étape
+                        script {
+                            discordSend(
+                                title: "Déploiement avec Helm",
+                                description: currentBuild.result == 'SUCCESS' ? "Réussi! Version déployée: ${env.VERSION}" : "Échoué!",
+                                footer: "Footer Text",
+                                link: env.BUILD_URL,
+                                result: currentBuild.currentResult,
+                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                            )
+                        }
                     }
                 }
             }
