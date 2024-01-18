@@ -28,10 +28,7 @@ pipeline {
                         
                         currentStep = "run tests"
                         echo "Étape 3 : Exécuter les tests de l'application (test.py)"
-                        sh 'python3 src/tesst.py'
-    
-                        currentStep = "stop flask server"
-                        echo "Étape 4 : Arrêter le serveur Flask"
+                        sh 'python3 src/test.py'
                         sh 'pkill -f main.py'
                         
 
@@ -41,7 +38,7 @@ pipeline {
                         
                         currentStep = "push docker image"
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
-                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
+                        sh "docker push reg.noesnic.duckdns.org/pythonapi:${env.VERSION}"
 
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
