@@ -13,19 +13,23 @@ pipeline {
                         sh 'touch log.txt'
                         echo "Étape 0 : Installation des dépendances"
                         sh 'pip3 install -r requirements.txt >> log.txt'
+                        sh 'echo "" > log.txt'
 
 
                         echo "Étape 1 : Lancer le serveur Flask main.py"
                         sh 'python3 src/main.py & >> log.txt'
+                        sh 'echo "" > log.txt'
                         
                         // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
                         sleep time: 5, unit: 'SECONDS'
                         
                         echo "Étape 2 : Exécuter les tests de l'application (test.py)"
                         sh 'python3 src/tesst.py >> log.txt'
+                        sh 'echo "" > log.txt'
                         
                         echo "Étape 3 : Arrêter le serveur Flask"
                         sh 'pkill -f main.py >> log.txt'
+                        sh 'echo "" > log.txt'
                         
                         echo "Étape 4 : Lire la version depuis le fichier"
                         def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
@@ -35,9 +39,11 @@ pipeline {
 
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
                         sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} . >> log.txt"
+                        sh 'echo "" > log.txt'
                         
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
                         sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION} >> log.txt"
+                        sh 'echo "" > log.txt'
 
                     } catch (Exception e) {
                         def te = sh(script: 'cat log.txt', returnStdout: true)
