@@ -71,12 +71,7 @@ pipeline {
             }
             steps {
                 script {
-
-                    // Étape d'exécution sur le nœud "master"
-                    // Assurez-vous d'avoir déjà configuré Helm dans votre environnement Jenkins
-                    def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                    env.VERSION = versionFileContent
-                    sh 'echo la version est ${env.VERSION}'
+                    sh 'echo test'
                 }
             }
         }
