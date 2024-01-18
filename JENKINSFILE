@@ -16,7 +16,7 @@ pipeline {
 
 
                         echo "Étape 1 : Lancer le serveur Flask main.py"
-                        sh'python3 src/main.py & > log.txt'
+                        sh 'python3 src/main.py & > log.txt'
                         
                         // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
                         sleep time: 5, unit: 'SECONDS'
@@ -40,7 +40,8 @@ pipeline {
                         sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION} > log.txt"
 
                     } catch (Exception e) {
-                        sh 'cat log.txt | echo'
+                        def te = sh(script: 'cat log.txt', returnStdout: true)
+                        echo "Erreur : ${te}"
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                     } finally {
                         
