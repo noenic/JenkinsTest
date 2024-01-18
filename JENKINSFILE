@@ -40,7 +40,7 @@ pipeline {
                         sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION} > log.txt"
 
                     } catch (Exception e) {
-                        sh 'cat log.txt'
+                        sh 'cat log.txt | echo'
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                     } finally {
                         
