@@ -9,8 +9,9 @@ pipeline {
             steps {
                 script {
                     try {
+                        def output
                         echo "Étape 0 : Installation des dépendances"
-                        def output =  sh(script: 'pip3 install -r requirements.txt', returnStdout: true).trim()
+                        output =  sh(script: 'pip3 install -r requirements.txt', returnStdout: true).trim()
                         echo {output}
 
                         echo "Étape 1 : Lancer le serveur Flask main.py"
