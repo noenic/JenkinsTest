@@ -6,8 +6,6 @@ metadata:
     app: {{ .Release.Name }}-python-app
 spec:
   replicas: 1
-  nodeSelector: 
-    kubernetes.io/hostname: nucworker1
   selector:
     matchLabels:
       app: {{ .Release.Name }}-python-app

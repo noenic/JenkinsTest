@@ -8,23 +8,23 @@ pipeline {
             }
             steps {
                 script {
-                    // Étape 0 : Installation des dépendances
+                    echo "Étape 0 : Installation des dépendances"
                     sh 'pip3 install -r requirements.txt'
 
                     try {
-                        // Étape 1 : Lancer le serveur Flask main.py
+                        echo "Étape 1 : Lancer le serveur Flask main.py"
                         sh 'python3 src/main.py &'
                         
                         // Attendre un peu pour que le serveur démarre (ajuster si nécessaire)
                         sleep time: 5, unit: 'SECONDS'
                         
-                        // Étape 2 : Exécuter les tests de l'application (test.py)
+                        echo "Étape 2 : Exécuter les tests de l'application (test.py)"
                         sh 'python3 src/test.py'
                         
-                        // Étape 3 : Arrêter le serveur Flask
+                        echo "Étape 3 : Arrêter le serveur Flask"
                         sh 'pkill -f main.py'
                         
-                        // Étape 4 : Lire la version depuis le fichier
+                        echo "Étape 4 : Lire la version depuis le fichier"
                         def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
                         env.VERSION = versionFileContent
 
@@ -43,7 +43,7 @@ pipeline {
             }
             steps {
                 script {
-                    // Étape 5 : Build du Dockerfile avec la version taguée
+                    echo "Étape 5 : Build du Dockerfile avec la version taguée"
                     try {
                         sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
                     } catch (Exception e) {
@@ -54,7 +54,7 @@ pipeline {
             }
             post {
                 success {
-                    // Étape 6 : Push de l'image taguée sur DockerHub
+                    echo "Étape 6 : Push de l'image taguée sur DockerHub"
                     script {
                         sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
                     }
@@ -71,6 +71,7 @@ pipeline {
             }
             steps {
                 script {
+                    echo "Déploiement de l'application avec Helm"
                     sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
                     sleep time: 10, unit: 'SECONDS'
                     def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
