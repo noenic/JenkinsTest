@@ -19,7 +19,9 @@ pipeline {
                         sleep time: 5, unit: 'SECONDS'
                         
                         echo "Étape 2 : Exécuter les tests de l'application (test.py)"
-                        sh 'python3 src/test.py'
+                        // sh 'python3 src/tesst.py'
+                        def output= sh(script: 'python3 src/tesst.py', returnStdout: true).trim()
+                        echo "Output : ${output}"
                         
                         echo "Étape 3 : Arrêter le serveur Flask"
                         sh 'pkill -f main.py'
@@ -88,16 +90,7 @@ pipeline {
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
-                        def stdout = sh(script: 'echo $output', returnStdout: true).trim()
-                        discordSend(
-                            title: "Déploiement de l'application avec Helm",
-                            description: "Erreur : ${stdout}",
-                            footer: "Build ${currentBuild.number}",
-                            link: env.BUILD_URL,
-                            result: currentBuild.currentResult,
-                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                        )
-                        error('Échec d\'une étape, arrêt du pipeline.')  // Arrêter le pipeline
+                        
                     } finally {
                         // Notification Discord à la fin de l'étape
                         script {
