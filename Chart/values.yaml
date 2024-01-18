@@ -3,3 +3,6 @@ image :
   pullPolicy : "Always"
   tag : "latest"
 
+
+nodeName: "nucworker1"
+
