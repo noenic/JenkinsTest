@@ -38,7 +38,7 @@ pipeline {
                         
                         currentStep = "push docker image"
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
-                        sh "docker push reg.noesnic.duckdns.org/pythonapi:${env.VERSION}"
+                        sh "docker push reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
 
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
