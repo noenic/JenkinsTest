@@ -34,7 +34,7 @@ pipeline {
 
                         currentStep = "build docker image"
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
+                        sh "docker build -t reg.noesnic.duckdns.org/pythonapi:${env.VERSION} ."
                         
                         currentStep = "push docker image"
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
@@ -55,7 +55,6 @@ pipeline {
                         )
                         if (currentBuild.currentResult == 'FAILURE') {
                             error("Erreur sur : ${currentStep}")
-                            archiveArtifacts artifacts: '**/*', fingerprint: true
                         }
                     
                     }
@@ -97,9 +96,6 @@ pipeline {
                                 webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
 
                             )
-                            if (currentBuild.currentResult == 'FAILURE') {
-                                archiveArtifacts artifacts: '**/*', fingerprint: true
-                            }
                         }
                     }
                 }
