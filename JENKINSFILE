@@ -71,7 +71,15 @@ pipeline {
             }
             steps {
                 script {
-                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION}"
+                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
+                    sleep time: 10, unit: 'SECONDS'
+                    def response = sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim()
+                    def latestVersion = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                    if (response == latestVersion) {
+                        echo "La dernière version est correctement déployée."
+                    } else {
+                        error("La dernière version n'est pas correctement déployée.")
+                    }
                 }
             }
         }
