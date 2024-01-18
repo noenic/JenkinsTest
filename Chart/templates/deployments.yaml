@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: python-app
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag}}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env : 
             - name: API_VERSION
