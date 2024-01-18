@@ -116,7 +116,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "cat /var/lib/jenkins/workspace/${currentBuild.number}/log"
+                    sh "cat /var/lib/jenkins/workspace/${currentBuild.number}/log"
                     archiveArtifacts artifacts: "/var/lib/jenkins/workspace/${currentBuild.number}/log", onlyIfSuccessful: false
                 }
             }
