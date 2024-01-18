@@ -76,7 +76,7 @@ pipeline {
                     // Assurez-vous d'avoir déjà configuré Helm dans votre environnement Jenkins
                     def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
                     env.VERSION = versionFileContent
-                    sh 'helm upgrade --install monapp monchart --set image.tag=${env.VERSION} --namespace tp'
+                    sh 'echo la version est ${env.VERSION}'
                 }
             }
         }
