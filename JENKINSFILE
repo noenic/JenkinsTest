@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        stage('Build and Test and Push on Worker') {
+        stage('Build and Push on Worker') {
             agent {
                 label 'worker'
             }
@@ -61,6 +61,19 @@ pipeline {
                 }
                 failure {
                     error('Les tests ont échoué, arrêt du pipeline.')
+                }
+            }
+        }
+
+        stage('Deploy Helm Chart on Master') {
+            agent {
+                label 'master'
+            }
+            steps {
+                script {
+                    // Étape d'exécution sur le nœud "master"
+                    // Assurez-vous d'avoir déjà configuré Helm dans votre environnement Jenkins
+                    sh 'helm upgrade --install monapp monchart --set image.tag=${env.VERSION} --namespace tp'
                 }
             }
         }
