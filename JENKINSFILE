@@ -57,7 +57,7 @@ pipeline {
                                 )
                                 sh 'rm log.txt'
                             } else {
-                                def output = sh(script: 'cat log.txt', returnStdout: true).trim()
+                                def output = sh(script: 'cat log.txt', returnStdout: true)
                                 discordSend(
                                     title: "Test, Build, and Push on Worker",
                                     description: "Erreur : ${output}",
@@ -113,7 +113,7 @@ pipeline {
                             )
                             sh 'rm log.txt'
                         } else {
-                            def output = sh(script: 'cat log.txt', returnStdout: true).trim()
+                            def output = sh(script: 'cat log.txt', returnStdout: true)
                             discordSend(
                                 title: "Deploy Helm Chart on Master",
                                 description: "Erreur : ${output}",
