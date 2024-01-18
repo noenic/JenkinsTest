@@ -13,27 +13,27 @@ pipeline {
                         echo "Étape 0 : Installation des dépendances"
                         sh 'pip3 install -r requirements.txt'
 
-                        currentStep = "start flask server"
-                        echo "Étape 1 : Lancer le serveur Flask main.py"
-                        sh 'python3 src/main.py &'
-                        
-                        // Attendre un peu pour que le serveur démarre 
-                        sleep time: 5, unit: 'SECONDS'
-                        
 
-                        currentStep = "run tests"
-                        echo "Étape 2 : Exécuter les tests de l'application (test.py)"
-                        sh 'python3 src/tesst.py'
-    
-                        currentStep = "stop flask server"
-                        echo "Étape 3 : Arrêter le serveur Flask"
-                        sh 'pkill -f main.py'
-                        
                         currentStep = "read version from file"
-                        echo "Étape 4 : Lire la version depuis le fichier"
+                        echo "Étape 1 : Lire la version depuis le fichier"
                         def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
                         env.VERSION = versionFileContent
                         echo "La version du fichier est : ${env.VERSION}"
+
+                        currentStep = "start flask server"
+                        echo "Étape 2 : Lancer le serveur Flask main.py"
+                        sh 'python3 src/main.py &'
+                        // Attendre un peu pour que le serveur démarre 
+                        sleep time: 5, unit: 'SECONDS'
+                        
+                        currentStep = "run tests"
+                        echo "Étape 3 : Exécuter les tests de l'application (test.py)"
+                        sh 'python3 src/tesst.py'
+    
+                        currentStep = "stop flask server"
+                        echo "Étape 4 : Arrêter le serveur Flask"
+                        sh 'pkill -f main.py'
+                        
 
                         currentStep = "build docker image"
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
@@ -48,25 +48,15 @@ pipeline {
                     } finally {
                         // Notification Discord à la fin de l'étape
                         // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
-                        if (currentBuild.currentResult == 'SUCCESS') {
-                            discordSend(
-                                title: "Test, Build, and Push on Worker",
-                                description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION}",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                            )
-                        } else {
-                            discordSend(
-                                title: "Test, Build, and Push on Worker",
-                                description: "Etat du build : ${currentBuild.currentResult} \n\n Version taguée : ${env.VERSION} \n\n Erreur lors de l'étape : ${currentStep}",
-                                footer: "Build ${currentBuild.number}",
-                                link: env.BUILD_URL,
-                                result: currentBuild.currentResult,
-                                webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
-                            )
-                        }
+                        discordSend(
+                            title: "Test, Build, and Push on Worker",
+                            description: currentBuild.currentResult == 'SUCCESS' ? "Le test, build et push de l'application est un succès." : "Le test, build et push de l'application est un échec. \n\n Etape en cours : ${currentStep}",
+                            footer: "Build ${currentBuild.number}",
+                            link: env.BUILD_URL,
+                            result: currentBuild.currentResult,
+                            webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
+                        )
+
                     
                 }
                 }
@@ -77,6 +67,12 @@ pipeline {
             agent {
                 label 'master'
             }
+            when {
+                expression {
+                    currentBuild.currentResult == 'SUCCESS'
+                }
+            }
+
             steps {
                 script {
                     try {
