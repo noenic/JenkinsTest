@@ -34,7 +34,7 @@ pipeline {
 
                         currentStep = "build docker image"
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                        sh "docker build -t reg.noesnic.duckdns.org/pythonapi:${env.VERSION} ."
+                        sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
                         
                         currentStep = "push docker image"
                         echo "Étape 6 : Push de l'image taguée sur DockerHub"
