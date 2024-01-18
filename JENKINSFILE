@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        stage('Build and Test on Worker') {
+        stage('Build and Test and Push on Worker') {
             agent {
                 label 'worker'
             }
