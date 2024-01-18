@@ -90,8 +90,7 @@ pipeline {
                         currentBuild.result = 'FAILURE'  // Marquer le build comme échoué
                     // Notification Discord à la fin de l'étape
                     // Si le build est un succès, on envoie une notification Discord avec un succès sinon une notification d'échec avec le output de la dernière commande
-                    script {
-                        def output // Declare the output variable
+                    
                         if (currentBuild.currentResult == 'SUCCESS') {
                             discordSend(
                                 title: "Deploy Helm Chart on Master",
@@ -111,7 +110,6 @@ pipeline {
                                 webhookURL: 'https://discord.com/api/webhooks/1098993052783235203/npvyM3x8vFAM4bH2ZE0UwPEjUO3pf-NB63c8pLJLOFLHBdSTGHyr3NlQkiF2GGTs8jEG'
                             )
                             error("La dernière version n'est pas correctement déployée.")
-                        }
                     }
                             
                             // Notification Discord à la fin de l'étape
