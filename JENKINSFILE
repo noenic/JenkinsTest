@@ -2,7 +2,7 @@ pipeline {
     agent none
 
     stages {
-        stage('Lire la version depuis le fichier') {
+        stage('Test on Worker') {
             agent {
                 label 'worker'
             }
