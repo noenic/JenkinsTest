@@ -37,7 +37,6 @@ pipeline {
                 label 'worker'
             }
             steps {
-                unstash 'VERSION'
                 script {
                     echo "Étape 5 : Build du Dockerfile avec la version taguée"
                     sh "docker build -t reg.noenic.duckdns.org/pythonapi:${VERSION} ."
@@ -73,7 +72,6 @@ pipeline {
                 script {
                     echo "Étape 0 : Récupération de la version"
                     VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                    echo "La version du fichier est : ${VERSION}"
                 }
                 script {
                     echo "Étape 1 : Déploiement de l'application sur le cluster"
