@@ -8,6 +8,7 @@ app = Flask(__name__)
 def toupper():
     text = request.args.get('text', '')
     return text.upper()
+
 # Endpoint pour obtenir la date d'aujourd'hui au format jj/mm/aaaa
 @app.route('/date')
 def get_date():
