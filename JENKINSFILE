@@ -54,6 +54,10 @@ pipeline {
                             result: currentBuild.currentResult,
                             webhookURL:  DISCORD_WEBHOOK
                         )
+                        if (currentBuild.currentResult == 'FAILURE') {
+                            error("Erreur sur : ${currentStep}")
+
+                        }
                     
                     }
                 }
@@ -102,6 +106,9 @@ pipeline {
                                 webhookURL: DISCORD_WEBHOOK
 
                             )
+                            if (currentBuild.currentResult == 'FAILURE') {
+                            error("Erreur sur : ${currentStep}")
+                            }
                         }
                     }
                 }
