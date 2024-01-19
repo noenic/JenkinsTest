@@ -48,7 +48,7 @@ pipeline {
                     sleep time: 5, unit: 'SECONDS'
                     
                     echo "Étape 7 : Tester l'endpoint /version"
-                    if(sh(script: 'curl -s 172.17.0.1:5050/version', returnStdout: true).trim() != VERSION) {
+                    if(sh(script: 'curl -s 172.17.0.1:5000/version', returnStdout: true).trim() != VERSION) {
                         error "Test de l'endpoint /version échoué"
                     }
                 }
