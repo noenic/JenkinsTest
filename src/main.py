@@ -27,7 +27,7 @@ def get_version():
 # Endpoints bidon
 @app.route('/endpoint1')
 def endpoint1():
-    return 'Ceci est l\'endpoint bidon 1'
+    return 'Ceci est l\'ensdpoint bidon 1'
 
 @app.route('/endpoint2')
 def endpoint2():
