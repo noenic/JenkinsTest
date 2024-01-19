@@ -15,7 +15,7 @@ kind: Pod
 spec:
   containers:
   - name: shell
-    image: ubuntu
+    image: python
     command:
     - sleep
     args:
