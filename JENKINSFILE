@@ -104,8 +104,6 @@ pipeline {
                         result: currentBuild.currentResult,
                         webhookURL: DISCORD_WEBHOOK
              )
-
-            logstashSend failBuild: true, maxLines: 1000
         }
     }
 }
