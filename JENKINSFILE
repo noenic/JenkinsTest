@@ -88,11 +88,10 @@ pipeline {
         }
     }
     post {
-        agent {
-            label 'master'
-        }
-        success {
-           always{
+        always{
+            agent {
+                label 'master'
+            }
             discordSend(
                                 title: "Déploiement de l'application avec Helm",
                                 description: currentBuild.currentResult == 'SUCCESS' ? "Le déploiement de l'application est un succès." : "Le déploiement de l'application est un échec. \n\n Erreur sur : ${currentStep}",
@@ -101,7 +100,6 @@ pipeline {
                                 result: currentBuild.currentResult,
                                 webhookURL: DISCORD_WEBHOOK
              )
-           }
         }
     }
 }
