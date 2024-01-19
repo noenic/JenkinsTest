@@ -1,2 +1,1 @@
-pythonAPI (test de jenkins)
-avec une fausse API python de test test
+Simple repo with a JENKINSFILE to leartn about jenkins 
