@@ -101,6 +101,9 @@ pipeline {
             agent {
                 label 'master'
             }
+            script {
+                echo "env.CURRENT_STEP = ${env.CURRENT_STEP}"
+            }
             discordSend(
                         title: "Projet PythonAPI",
                         description: currentBuild.currentResult == 'SUCCESS' ? "Le déploiement de l'application est un succès." : "Le déploiement de l'application est un échec. \n\n ${currentBuild.currentResult}",
