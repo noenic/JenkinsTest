@@ -108,4 +108,5 @@ pipeline {
                 sh "curl -H \"Content-Type: application/json\" -X POST -d '{\"content\": \"Build de la version ${VERSION} échoué\"}' ${DISCORD_WEBHOOK}"
             }
         }
+    }
 }
