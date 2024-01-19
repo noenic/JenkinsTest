@@ -51,6 +51,7 @@ pipeline {
                     if(sh(script: 'curl -s 172.17.0.1:5000/version', returnStdout: true).trim() != VERSION) {
                         error "Test de l'endpoint /version échoué"
                     }
+                    sh "docker rm -f pythonapi"
                 }
             }
         }
