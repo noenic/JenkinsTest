@@ -88,25 +88,20 @@ pipeline {
         }
     }
     post {
-        success {
-            script {
-                echo "Étape 0 : Récupération de la version"
-                VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
-            }
-            script {
-                echo "Étape 1 : Envoi d'un message sur Discord"
-                sh "curl -H \"Content-Type: application/json\" -X POST -d '{\"content\": \"Build de la version ${VERSION} réussi\"}' ${DISCORD_WEBHOOK}"
-            }
+        agent {
+            label 'master'
         }
-        failure {
-            script {
-                echo "Étape 0 : Récupération de la version"
-                VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
-            }
-            script {
-                echo "Étape 1 : Envoi d'un message sur Discord"
-                sh "curl -H \"Content-Type: application/json\" -X POST -d '{\"content\": \"Build de la version ${VERSION} échoué\"}' ${DISCORD_WEBHOOK}"
-            }
+        success {
+           always{
+            discordSend(
+                                title: "Déploiement de l'application avec Helm",
+                                description: currentBuild.currentResult == 'SUCCESS' ? "Le déploiement de l'application est un succès." : "Le déploiement de l'application est un échec. \n\n Erreur sur : ${currentStep}",
+                                footer: "Build ${currentBuild.number}",
+                                link: env.BUILD_URL,
+                                result: currentBuild.currentResult,
+                                webhookURL: DISCORD_WEBHOOK
+             )
+           }
         }
     }
 }
