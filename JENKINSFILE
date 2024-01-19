@@ -51,41 +51,39 @@ pipeline {
                     echo "Étape 7 : Tester l'endpoint /version"
                     if(sh(script: 'curl localhost:5000/version', returnStdout: true).trim() != VERSION) {
                         error "Test de l'endpoint /version échoué"
-                }
+                    }
                     sh 'docker stop $(docker ps -a -q)'
                     sh 'docker rm $(docker ps -a -q)'
-
                 }
             }
         }
-    }
-    stage('Push Docker Image') {
-        agent {
-            label 'worker'
-        }
-        steps {
-            script {
-                sh "docker push reg.noenic.duckdns.org/pythonapi:${VERSION}"
+        stage('Push Docker Image') {
+            agent {
+                label 'worker'
             }
-        }
-    }
-    stage('Deploy to cluster') {
-        agent {
-            label 'master'
-        }
-        steps {
-            script {
-                echo "Étape 1 : Déploiement de l'application sur le cluster"
-                sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
-                sleep time: 10, unit: 'SECONDS'
-            }
-            script{
-                echo "Étape 2 : Test de l'application déployée"
-                if (sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim() != VERSION) {
-                    error "Test de l'endpoint /version échoué"
+            steps {
+                script {
+                    sh "docker push reg.noenic.duckdns.org/pythonapi:${VERSION}"
                 }
-             }
+            }
+        }
+        stage('Deploy to cluster') {
+            agent {
+                label 'master'
+            }
+            steps {
+                script {
+                    echo "Étape 1 : Déploiement de l'application sur le cluster"
+                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
+                    sleep time: 10, unit: 'SECONDS'
+                }
+                script{
+                    echo "Étape 2 : Test de l'application déployée"
+                    if (sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim() != VERSION) {
+                        error "Test de l'endpoint /version échoué"
+                    }
+                }
+            }
         }
     }
 }
-
