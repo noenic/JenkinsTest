@@ -44,11 +44,11 @@ pipeline {
 
                 script {
                     echo "Étape 6 : test de l'image"
-                    sh "docker run -d -p 5050:5000 --name pythonapi --rm reg.noenic.duckdns.org/pythonapi:${VERSION}"
+                    sh "docker run -d -p 5000:5000 --name pythonapi --rm reg.noenic.duckdns.org/pythonapi:${VERSION}"
                     sleep time: 5, unit: 'SECONDS'
                     
                     echo "Étape 7 : Tester l'endpoint /version"
-                    if(sh(script: 'curl -s localhost:5050/version', returnStdout: true).trim() != VERSION) {
+                    if(sh(script: 'curl -s 172.17.0.1:5050/version', returnStdout: true).trim() != VERSION) {
                         error "Test de l'endpoint /version échoué"
                     }
                 }
