@@ -16,9 +16,8 @@ pipeline {
                 }
                 script {
                     echo "Étape 1 : Lire la version depuis le fichier"
-                    def versionFileContent = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                    params.VERSION = versionFileContent
-                    echo "La version du fichier est : ${params.VERSION}"
+                    VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                    echo "La version du fichier est : ${VERSION}"
                 }
                 script {
                     echo "Étape 2 : Lancer le serveur Flask main.py"
@@ -40,12 +39,12 @@ pipeline {
             steps {
                 script {
                     echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                    sh "docker build -t reg.noenic.duckdns.org/pythonapi:${params.VERSION} ."
+                    sh "docker build -t reg.noenic.duckdns.org/pythonapi:${VERSION} ."
                 }
                 script {
                     currentStep = "push docker image"
                     echo "Étape 6 : Push de l'image taguée sur DockerHub"
-                    sh "docker push reg.noenic.duckdns.org/pythonapi:${params.VERSION}"
+                    sh "docker push reg.noenic.duckdns.org/pythonapi:${VERSION}"
                 }
             }
         }
