@@ -31,8 +31,7 @@ pipeline {
                         sleep time: 5, unit: 'SECONDS'
                 }
                 script {
-                        echo "Étape 3 : Exécuter les
-                         tests de l'application (test.py)"
+                        echo "Étape 3 : Exécuter les tests de l'application (test.py)"
                         sh 'python3 src/test.py'
                         sh 'pkill -f main.py'
                 }
