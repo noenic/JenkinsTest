@@ -2,7 +2,6 @@ pipeline {
     agent none
     environment {
         DISCORD_WEBHOOK = credentials('discord_webhook')
-        VERSION = ''
     }
     stages {
         stage('Test on Worker') {
@@ -88,4 +87,25 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            script {
+                echo "Étape 0 : Récupération de la version"
+                VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
+            }
+            script {
+                echo "Étape 1 : Envoi d'un message sur Discord"
+                sh "curl -H \"Content-Type: application/json\" -X POST -d '{\"content\": \"Build de la version ${VERSION} réussi\"}' ${DISCORD_WEBHOOK}"
+            }
+        }
+        failure {
+            script {
+                echo "Étape 0 : Récupération de la version"
+                VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
+            }
+            script {
+                echo "Étape 1 : Envoi d'un message sur Discord"
+                sh "curl -H \"Content-Type: application/json\" -X POST -d '{\"content\": \"Build de la version ${VERSION} échoué\"}' ${DISCORD_WEBHOOK}"
+            }
+        }
 }
