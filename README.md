@@ -1,1 +1,1 @@
-Simple repo with a JENKINSFILE to leartn about jenkins 
+Simple repo with a JENKINSFILE to learn about jenkins 
