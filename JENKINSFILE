@@ -66,7 +66,7 @@ pipeline {
             steps {
                 script {
                     env.CURRENT_STEP = "push docker image"
-                    sh "docker push reg.nosenic.duckdns.org/pythonapi:${VERSION}"
+                    sh "docker push reg.noenic.duckdns.org/pythonapi:${VERSION}"
                 }
             }
         }
