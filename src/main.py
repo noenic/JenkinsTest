@@ -33,5 +33,34 @@ def endpoint1():
 def endpoint2():
     return 'Ceci est l\'endpoint bidon 2'
 
+@app.route('/')
+def index():
+    return jsonify({
+        'version': API_VERSION,
+        'endpoints': {
+            'toupper': {
+                'url': '/toupper?text=hello',
+                'description': 'Convertit un texte en majuscules'
+            },
+            'date': {
+                'url': '/date',
+                'description': 'Renvoie la date du jour au format jj/mm/aaaa'
+            },
+            'version': {
+                'url': '/version',
+                'description': 'Renvoie la version de l\'API'
+            },
+            'endpoint1': {
+                'url': '/endpoint1',
+                'description': 'Renvoie un message bidon'
+            },
+            'endpoint2': {
+                'url': '/endpoint2',
+                'description': 'Renvoie un autre message bidon'
+            }
+        }
+    })
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
