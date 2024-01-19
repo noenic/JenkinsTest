@@ -22,7 +22,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.text, file_content)
     def test_endpoint1(self):
         response = requests.get(self.base_url + '/endpoint1')
-        self.assertEqual(response.text, "Ceci est l'endspoint bidon 1")
+        self.assertEqual(response.text, "Ceci est l'endpoint bidon 1")
         # Ajoutez ici des assertions pour vérifier la réponse de l'endpoint 1
 
     def test_endpoint2(self):
