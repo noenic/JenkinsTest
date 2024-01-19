@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kinsd: Deployment
+kind: Deployment
 metadata:
   name: {{ .Release.Name }}-python-app
   labels:

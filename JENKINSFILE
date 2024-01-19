@@ -17,8 +17,8 @@ pipeline {
                 script {
                     env.CURRENT_STEP = "Get version from file"
                     echo "Étape 1 : Lire la version depuis le fichier"
-                    VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                    echo "La version du fichier est : ${VERSION}"
+                    env.VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                    echo "La version du fichier est : ${env.VERSION}"
                 }
                 script {
                     env.CURRENT_STEP = "Run Flask server"
@@ -43,16 +43,16 @@ pipeline {
                 script {
                     env.CURRENT_STEP = "build docker image"
                     echo "Étape 5 : Build du Dockerfile avec la version taguée"
-                    sh "docker build -t reg.noenic.duckdns.org/pythonapi:${VERSION} ."
+                    sh "docker build -t reg.noenic.duckdns.org/pythonapi:${env.VERSION} ."
                 }
                 script {
                     env.CURRENT_STEP = "test docker image"
                     echo "Étape 6 : test de l'image"
                     sh "docker rm -f pythonapi || true"
-                    sh "docker run -d -p 5000:5000 --name pythonapi --rm reg.noenic.duckdns.org/pythonapi:${VERSION}"
+                    sh "docker run -d -p 5000:5000 --name pythonapi --rm reg.noenic.duckdns.org/pythonapi:${env.VERSION}"
                     sleep time: 5, unit: 'SECONDS'
                     echo "Étape 7 : Tester l'endpoint /version"
-                    if(sh(script: 'curl -s 172.17.0.1:5000/version', returnStdout: true).trim() != VERSION) {
+                    if(sh(script: 'curl -s 172.17.0.1:5000/version', returnStdout: true).trim() != env.VERSION) {
                         error "Test de l'endpoint /version échoué"
                     }
                     sh "docker rm -f pythonapi"
@@ -76,20 +76,15 @@ pipeline {
             }
             steps {
                 script {
-                    env.CURRENT_STEP = "get version from file (helm-side)"
-                    echo "Étape 0 : Récupération de la version"
-                    VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
-                }
-                script {
                     env.CURRENT_STEP = "deploy to cluster"
                     echo "Étape 1 : Déploiement de l'application sur le cluster"
-                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${VERSION} -n tp"
+                    sh "helm upgrade --install pythonapi ./Chart --set image.tag=${env.VERSION} -n tp"
                     sleep time: 10, unit: 'SECONDS'
                 }
                 script {
                     env.CURRENT_STEP = "test deployed application"
                     echo "Étape 2 : Test de l'application déployée"
-                    if (sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim() != VERSION) {
+                    if (sh(script: "curl -s http://192.168.0.250:30809/version", returnStdout: true).trim() != env.VERSION) {
                         error "Test de l'endpoint /version échoué"
                     }
                 }
