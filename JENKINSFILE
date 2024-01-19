@@ -30,7 +30,6 @@ pipeline {
                     sh 'python3 src/test.py'
                     sh 'pkill -f python3'
                 }
-                stash name: 'VERSION', includes: 'VERSION'
             }
         }
         stage('Build and Test Docker Image') {
@@ -71,7 +70,11 @@ pipeline {
                 label 'master'
             }
             steps {
-                unstash 'VERSION'
+                script {
+                    echo "Étape 0 : Récupération de la version"
+                    VERSION = sh(script: 'cat ./src/version', returnStdout: true).trim()
+                    echo "La version du fichier est : ${VERSION}"
+                }
                 script {
                     echo "Étape 1 : Déploiement de l'application sur le cluster"
                     sh "helm upgrade --install pythonapi ./Chart --set image.tag=${VERSION} -n tp"
