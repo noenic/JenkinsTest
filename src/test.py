@@ -25,11 +25,13 @@ class TestApi(unittest.TestCase):
     def test_endpoint1(self):
         response = requests.get(self.base_url + '/endpoint1')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, "Ceci est l'endpoint bidon 1")
         # Ajoutez ici des assertions pour vérifier la réponse de l'endpoint 1
 
     def test_endpoint2(self):
         response = requests.get(self.base_url + '/endpoint2')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, "Ceci est l'endpoint bidon 2")
         # Ajoutez ici des assertions pour vérifier la réponse de l'endpoint 2
 
 if __name__ == '__main__':
