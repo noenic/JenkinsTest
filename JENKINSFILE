@@ -3,6 +3,7 @@ pipeline {
     environment {
     DISCORD_WEBHOOK = credentials('discord_webhook')
     CURRENT_STEP = ''
+    VERSION = ''
     }
     stages {
         stage('Test on Worker') {
@@ -11,7 +12,6 @@ pipeline {
             }
             steps {
                 script {
-                        // On met la variable d'environnement CURRENT_STEP à jour pour la notification Discord
                         echo "Étape 0 : Installation des dépendances"
                         sh 'pip3 install -r requirements.txt'
                 }
@@ -32,6 +32,13 @@ pipeline {
                         sh 'python3 src/test.py'
                         sh 'pkill -f main.py'
                 }
+            }
+        }
+        stage('Build and Push Docker Image') {
+            agent {
+                label 'worker'
+            }
+            steps {
                 script {
 
                         echo "Étape 5 : Build du Dockerfile avec la version taguée"
