@@ -5,9 +5,6 @@ pipeline {
     CURRENT_STEP = ''
     }
     stages {
-pipeline {
-    agent none
-    stages {
         stage('Test on Worker') {
             agent {
                 label 'worker'
